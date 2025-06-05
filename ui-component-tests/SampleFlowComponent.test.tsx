@@ -17,25 +17,24 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Import the component under test (this would be your actual component)
 // import { SampleFlowComponent } from '../components/SampleFlowComponent';
 
 // Mock external dependencies
-vi.mock('../services/api', () => ({
-  fetchUserData: vi.fn(),
-  submitForm: vi.fn(),
-  validateInput: vi.fn(),
+jest.mock('../services/api', () => ({
+  fetchUserData: jest.fn(),
+  submitForm: jest.fn(),
+  validateInput: jest.fn(),
 }));
 
-vi.mock('../hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({
+jest.mock('../hooks/useAuth', () => ({
+  useAuth: jest.fn(() => ({
     user: { id: '123', name: 'Test User', email: 'test@example.com' },
     isAuthenticated: true,
-    login: vi.fn(),
-    logout: vi.fn(),
+    login: jest.fn(),
+    logout: jest.fn(),
   })),
 }));
 
@@ -177,21 +176,13 @@ const renderWithProviders = (component: React.ReactElement) => {
   );
 };
 
-// Custom matchers for better assertions
-expect.extend({
-  toBeInStep(received: HTMLElement, expectedStep: number) {
-    const stepIndicator = within(received).getByTestId('step-indicator');
-    const pass = stepIndicator.textContent === `Step ${expectedStep} of 4`;
-    
-    return {
-      message: () => 
-        pass 
-          ? `Expected component not to be in step ${expectedStep}`
-          : `Expected component to be in step ${expectedStep}, but was in ${stepIndicator.textContent}`,
-      pass,
-    };
-  },
-});
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeInStep(received: HTMLElement, expectedStep: number): R;
+    }
+  }
+}
 
 describe('SampleFlowComponent', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -201,7 +192,7 @@ describe('SampleFlowComponent', () => {
     user = userEvent.setup({ delay: null });
     
     // Clear all mocks before each test
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     
     // Reset any global state if needed
     // resetGlobalState();
@@ -209,7 +200,7 @@ describe('SampleFlowComponent', () => {
 
   afterEach(() => {
     // Cleanup after each test
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('Initial Render', () => {
@@ -459,7 +450,7 @@ describe('SampleFlowComponent', () => {
       // This test would require React DevTools Profiler or custom render counting
       // For demonstration purposes, we'll show the structure
       
-      const renderSpy = vi.fn();
+      const renderSpy = jest.fn();
       
       // In a real scenario, you might wrap your component with a render counter
       // const WrappedComponent = () => {
@@ -477,8 +468,8 @@ describe('SampleFlowComponent', () => {
   describe('Integration Tests', () => {
     it('should work with external API calls', async () => {
       // Arrange - Mock API responses
-      const mockSubmitForm = vi.fn().mockResolvedValue({ success: true });
-      vi.mocked(mockSubmitForm);
+      const mockSubmitForm = jest.fn().mockResolvedValue({ success: true });
+      jest.mocked(mockSubmitForm);
 
       renderWithProviders(<SampleFlowComponent />);
 

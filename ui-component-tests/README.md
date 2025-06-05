@@ -85,12 +85,17 @@ it('should have proper accessibility attributes', () => {
 ### Required Dependencies
 ```json
 {
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "@tanstack/react-query": "^4.0.0"
+  },
   "devDependencies": {
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
     "@testing-library/jest-dom": "^5.16.5",
-    "vitest": "^0.34.0",
-    "@tanstack/react-query": "^4.0.0"
+    "@types/jest": "^27.5.2"
   }
 }
 ```
@@ -121,20 +126,53 @@ const renderWithProviders = (component: React.ReactElement) => {
 };
 ```
 
+### Jest Configuration
+Create a `setupTests.ts` file in your src directory:
+
+```typescript
+// setupTests.ts
+import '@testing-library/jest-dom';
+
+// Extend Jest matchers
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeInStep(expectedStep: number): R;
+    }
+  }
+}
+
+// Add custom matcher
+expect.extend({
+  toBeInStep(received: HTMLElement, expectedStep: number) {
+    const stepIndicator = received.querySelector('[data-testid="step-indicator"]');
+    const pass = stepIndicator?.textContent === `Step ${expectedStep} of 4`;
+    
+    return {
+      message: () => 
+        pass 
+          ? `Expected component not to be in step ${expectedStep}`
+          : `Expected component to be in step ${expectedStep}, but was in ${stepIndicator?.textContent}`,
+      pass,
+    };
+  },
+});
+```
+
 ## Mock Management
 
 ### External Dependencies
 ```typescript
 // Mock API services
-vi.mock('../services/api', () => ({
-  fetchUserData: vi.fn(),
-  submitForm: vi.fn(),
-  validateInput: vi.fn(),
+jest.mock('../services/api', () => ({
+  fetchUserData: jest.fn(),
+  submitForm: jest.fn(),
+  validateInput: jest.fn(),
 }));
 
 // Mock custom hooks
-vi.mock('../hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({
+jest.mock('../hooks/useAuth', () => ({
+  useAuth: jest.fn(() => ({
     user: { id: '123', name: 'Test User' },
     isAuthenticated: true,
   })),
@@ -144,24 +182,32 @@ vi.mock('../hooks/useAuth', () => ({
 ### Mock Lifecycle
 ```typescript
 beforeEach(() => {
-  vi.clearAllMocks();
+  jest.clearAllMocks();
   // Reset global state if needed
 });
 
 afterEach(() => {
-  vi.restoreAllMocks();
+  jest.restoreAllMocks();
 });
 ```
 
 ## Custom Matchers
 
-Extend Jest/Vitest with domain-specific assertions:
+Extend Jest with domain-specific assertions:
 
 ```typescript
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeInStep(expectedStep: number): R;
+    }
+  }
+}
+
 expect.extend({
   toBeInStep(received: HTMLElement, expectedStep: number) {
-    const stepIndicator = within(received).getByTestId('step-indicator');
-    const pass = stepIndicator.textContent === `Step ${expectedStep} of 4`;
+    const stepIndicator = received.querySelector('[data-testid="step-indicator"]');
+    const pass = stepIndicator?.textContent === `Step ${expectedStep} of 4`;
     
     return {
       message: () => 
@@ -174,69 +220,100 @@ expect.extend({
 });
 ```
 
-## Test Categories
+## Running Tests
 
-### 1. Initial Render Tests
-- Component mounts without errors
-- Initial state is correct
-- Required elements are present
-- Accessibility attributes are set
+```bash
+# Run all tests
+npm test
 
-### 2. User Interaction Tests
-- Form inputs work correctly
-- Button clicks trigger expected behavior
-- Navigation between steps functions
-- Keyboard navigation is supported
+# Run tests in watch mode
+npm test -- --watch
 
-### 3. State Management Tests
-- State updates correctly
-- Form data persists across steps
-- Validation states are handled
-- Error states are managed
+# Run tests with coverage
+npm test -- --coverage
 
-### 4. Async Operation Tests
-- Loading states are shown
-- Success states are handled
-- Error scenarios are covered
-- API calls are made correctly
+# Run specific test file
+npm test SampleFlowComponent.test.tsx
 
-### 5. Edge Case Tests
-- Empty form handling
-- Rapid user interactions
-- Network failures
-- Invalid data scenarios
+# Run tests in CI mode
+CI=true npm test
+```
 
-### 6. Integration Tests
-- Component works with providers
-- External API integration
-- Route navigation (if applicable)
-- Global state management
+## Debugging Tests
 
-## Best Practices Checklist
+### Using Debug Utilities
+```typescript
+import { screen } from '@testing-library/react';
 
-### ✅ Test Structure
-- [ ] Tests are organized in logical describe blocks
-- [ ] Test names clearly describe expected behavior
-- [ ] AAA pattern is followed consistently
-- [ ] Setup and teardown are handled properly
+// Debug current DOM state
+screen.debug();
 
-### ✅ User Experience
-- [ ] Tests focus on user behavior
-- [ ] Accessibility is tested
-- [ ] Keyboard navigation is verified
-- [ ] Screen reader compatibility is checked
+// Debug specific element
+screen.debug(screen.getByRole('button'));
 
-### ✅ Reliability
-- [ ] Tests are deterministic
-- [ ] Async operations are properly awaited
-- [ ] Mocks are realistic and consistent
-- [ ] Edge cases are covered
+// Log queries that were attempted
+screen.logTestingPlaygroundURL();
+```
 
-### ✅ Maintainability
-- [ ] Tests are readable and well-documented
-- [ ] Common patterns are extracted to utilities
-- [ ] Custom matchers improve clarity
-- [ ] Test data is realistic but minimal
+### Common Debugging Commands
+```typescript
+// Find all elements by role
+screen.getAllByRole('button').forEach(button => 
+  console.log(button.textContent)
+);
+
+// Check what's currently rendered
+console.log(container.innerHTML);
+
+// Wait for element and debug
+await waitFor(() => {
+  screen.debug(screen.getByTestId('async-content'));
+});
+```
+
+### Jest Debugging
+```bash
+# Run tests with Node debugger
+node --inspect-brk node_modules/.bin/react-scripts test --runInBand --no-cache
+
+# Run single test file in debug mode
+npm test -- --testNamePattern="should render" --no-coverage --watchAll=false
+```
+
+## React Scripts Configuration
+
+### Package.json Scripts
+```json
+{
+  "scripts": {
+    "test": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
+    "test:ci": "CI=true react-scripts test --coverage --watchAll=false"
+  }
+}
+```
+
+### Jest Configuration in package.json
+```json
+{
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/index.tsx",
+      "!src/reportWebVitals.ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}
+```
 
 ## Common Pitfalls to Avoid
 
@@ -277,51 +354,14 @@ it('should handle submission errors gracefully', async () => {
 });
 ```
 
-## Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm test -- --watch
-
-# Run tests with coverage
-npm test -- --coverage
-
-# Run specific test file
-npm test SampleFlowComponent.test.tsx
-```
-
-## Debugging Tests
-
-### Using Debug Utilities
+### ❌ Not Cleaning Up Mocks
 ```typescript
-import { screen } from '@testing-library/react';
+// Bad - mocks persist between tests
+jest.mock('../api');
 
-// Debug current DOM state
-screen.debug();
-
-// Debug specific element
-screen.debug(screen.getByRole('button'));
-
-// Log queries that were attempted
-screen.logTestingPlaygroundURL();
-```
-
-### Common Debugging Commands
-```typescript
-// Find all elements by role
-screen.getAllByRole('button').forEach(button => 
-  console.log(button.textContent)
-);
-
-// Check what's currently rendered
-console.log(container.innerHTML);
-
-// Wait for element and debug
-await waitFor(() => {
-  screen.debug(screen.getByTestId('async-content'));
+// Good - clean up mocks
+beforeEach(() => {
+  jest.clearAllMocks();
 });
 ```
 
@@ -340,8 +380,9 @@ Consider adding these patterns as your testing suite grows:
 - [React Testing Library Documentation](https://testing-library.com/docs/react-testing-library/intro/)
 - [Testing Library Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
 - [Accessibility Testing Guide](https://web.dev/accessibility-testing/)
-- [Vitest Documentation](https://vitest.dev/)
+- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [React Scripts Testing](https://create-react-app.dev/docs/running-tests/)
 
 ---
 
-This guide serves as a foundation for building robust, maintainable UI component tests. Adapt these patterns to fit your specific application needs while maintaining the core principles of user-centric, accessible, and reliable testing.
+This guide serves as a foundation for building robust, maintainable UI component tests using Jest and React Testing Library with react-scripts. Adapt these patterns to fit your specific application needs while maintaining the core principles of user-centric, accessible, and reliable testing.
