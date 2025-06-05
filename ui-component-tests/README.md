@@ -4,7 +4,7 @@ This directory contains comprehensive examples and guidelines for testing React 
 
 ## Overview
 
-The `SampleFlowComponent.test.tsx` file demonstrates a complete testing approach for a multi-step form component, showcasing various testing patterns and best practices that should be applied to all UI component tests.
+The examples in this guide demonstrate a complete testing approach for UI components, such as a multi-step form, showcasing various testing patterns and best practices that should be applied to all UI component tests.
 
 ## Testing Philosophy
 
