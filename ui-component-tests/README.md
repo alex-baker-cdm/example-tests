@@ -82,20 +82,23 @@ it('should have proper accessibility attributes', () => {
 
 ## Testing Tools and Setup
 
+### Prerequisites
+- **Node.js 22 LTS** — see the root [README](../README.md) for setup instructions via nvm.
+
 ### Required Dependencies
 ```json
 {
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-scripts": "5.0.1",
-    "@tanstack/react-query": "^4.0.0"
+    "@tanstack/react-query": "^5.0.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.4.3",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@types/jest": "^27.5.2"
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@types/jest": "^29.5.0"
   }
 }
 ```
@@ -386,3 +389,5 @@ Consider adding these patterns as your testing suite grows:
 ---
 
 This guide serves as a foundation for building robust, maintainable UI component tests using Jest and React Testing Library with react-scripts. Adapt these patterns to fit your specific application needs while maintaining the core principles of user-centric, accessible, and reliable testing.
+
+> **Note:** This guide targets **Node.js 22 LTS**. See the repository root [README](../README.md) for environment setup.
