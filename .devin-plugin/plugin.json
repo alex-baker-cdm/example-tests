@@ -1,0 +1,8 @@
+{
+  "name": "sky-consumer-ux-standards",
+  "version": "1.0.0",
+  "description": "Sky Group consumer app UX standards: design tokens, interaction patterns, accessibility and copy rules for My Sky (iOS, Android, web), sky.com and Sky Glass/Stream companion apps. Required for every Devin session touching a Sky customer-facing surface.",
+  "author": { "name": "Sky Design Systems & Engineering Standards" },
+  "repository": "https://github.com/alex-baker-cdm/example-tests",
+  "keywords": ["sky", "ux", "design-system", "accessibility", "mobile", "web", "standards"]
+}
