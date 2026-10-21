@@ -13,6 +13,6 @@ skills/sky-platform-conventions/   SwiftUI / Compose / React mapping, parity che
 skills/sky-ux-review/              SKY-UX-001…015 review checklist
 ```
 
-Install for the whole org: Customize → Plugins → Add from GitHub → `alex-baker-cdm/example-tests`, mark as required. Or per repo in `.devin/config.json`.
+Install for the whole org: Customize → Plugins → Add from GitHub → `alex-baker-cdm/eng-standards`, mark as required. Or per repo in `.devin/config.json`.
 
 Legacy example test guides live in `unit-tests/`, `ui-component-tests/` and `contract-tests/`.
